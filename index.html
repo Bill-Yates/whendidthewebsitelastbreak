@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Time Since the Website Broke</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 10%;
+      background: #f8f9fa;
+      color: #333;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    #timer {
+      font-size: 3em;
+      margin-top: 20px;
+      color: #28a745;
+    }
+    #status {
+      margin-top: 20px;
+      color: #555;
+    }
+    #reset {
+      display: inline-block;
+      margin-top: 40px;
+      padding: 12px 24px;
+      font-size: 1em;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #reset:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Time since the website broke:</h1>
+  <div id="timer">Loading...</div>
+  <div id="status"></div>
+
+  <!-- 👇 Replace YOUR_USERNAME and REPO_NAME below -->
+  <a id="reset" 
+     href="https://github.com/YOUR_USERNAME/REPO_NAME/edit/main/last_reset.txt" 
+     target="_blank">
+     Reset Timer
+  </a>
+
+  <script>
+    async function fetchLastReset() {
+      try {
+        const res = await fetch('last_reset.txt', { cache: 'no-store' });
+        const text = await res.text();
+        return new Date(text.trim());
+      } catch (err) {
+        document.getElementById('status').textContent = 'Error loading last reset time.';
+        console.error(err);
+      }
+    }
+
+    function updateTimer(lastReset) {
+      const now = new Date();
+      const diff = now - lastReset;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      const secs = Math.floor((diff / 1000) % 60);
+      document.getElementById('timer').textContent =
+        `${days}d ${hours}h ${mins}m ${secs}s`;
+    }
+
+    async function startTimer() {
+      const lastReset = await fetchLastReset();
+      if (!lastReset) return;
+      updateTimer(lastReset);
+      setInterval(() => updateTimer(lastReset), 1000);
+      document.getElementById('status').textContent =
+        `Last reset: ${lastReset.toUTCString()}`;
+    }
+
+    startTimer();
+  </script>
+</body>
+</html>
